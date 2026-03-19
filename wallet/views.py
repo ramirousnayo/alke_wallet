@@ -1,4 +1,5 @@
 from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib import messages
 from .models import Usuario, Cuenta, Transaccion
 from .forms import UsuarioForm, TransaccionForm
 
@@ -24,6 +25,7 @@ def usuario_create(request):
         if form.is_valid():
             usuario = form.save()
             Cuenta.objects.create(usuario=usuario)
+            messages.success(request, f'Usuario {usuario.nombre} creado con éxito.')
             return redirect('usuario_list')
     else:
         form = UsuarioForm()
@@ -35,6 +37,7 @@ def usuario_update(request, pk):
     form = UsuarioForm(request.POST or None, instance=usuario)
     if form.is_valid():
         form.save()
+        messages.success(request, f'Usuario {usuario.nombre} actualizado con éxito.')
         return redirect('usuario_list')
     return render(request, 'wallet/usuario_form.html', {'form': form, 'titulo': 'Editar Usuario'})
 
@@ -42,7 +45,9 @@ def usuario_update(request, pk):
 def usuario_delete(request, pk):
     usuario = get_object_or_404(Usuario, pk=pk)
     if request.method == 'POST':
+        nombre = usuario.nombre
         usuario.delete()
+        messages.success(request, f'Usuario {nombre} eliminado con éxito.')
         return redirect('usuario_list')
     return render(request, 'wallet/usuario_confirm_delete.html', {'objeto': usuario, 'tipo': 'usuario'})
 
@@ -73,6 +78,7 @@ def transaccion_create(request):
     if form.is_valid():
         transaccion = form.save()
         _actualizar_saldo(transaccion.cuenta)
+        messages.success(request, 'Transacción registrada con éxito.')
         return redirect('transaccion_list')
     return render(request, 'wallet/transaccion_form.html', {'form': form, 'titulo': 'Nueva Transacción'})
 
@@ -86,6 +92,7 @@ def transaccion_update(request, pk):
         _actualizar_saldo(cuenta_anterior)
         if transaccion_guardada.cuenta != cuenta_anterior:
             _actualizar_saldo(transaccion_guardada.cuenta)
+        messages.success(request, 'Transacción actualizada con éxito.')
         return redirect('transaccion_list')
     return render(request, 'wallet/transaccion_form.html', {'form': form, 'titulo': 'Editar Transacción'})
 
@@ -96,5 +103,6 @@ def transaccion_delete(request, pk):
         cuenta = transaccion.cuenta
         transaccion.delete()
         _actualizar_saldo(cuenta)
+        messages.success(request, 'Transacción eliminada con éxito.')
         return redirect('transaccion_list')
     return render(request, 'wallet/transaccion_confirm_delete.html', {'objeto': transaccion, 'tipo': 'transacción'})
