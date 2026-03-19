@@ -59,19 +59,33 @@ def transaccion_detail(request, pk):
     return render(request, 'wallet/transaccion_detail.html', {'transaccion': transaccion})
 
 
+def _actualizar_saldo(cuenta):
+    """Recalcula y guarda el saldo real de la cuenta según sus transacciones."""
+    from django.db.models import Sum
+    depositos = cuenta.transaccion_set.filter(tipo='deposito').aggregate(total=Sum('monto'))['total'] or 0
+    retiros   = cuenta.transaccion_set.filter(tipo='retiro').aggregate(total=Sum('monto'))['total'] or 0
+    cuenta.saldo = depositos - retiros
+    cuenta.save()
+
+
 def transaccion_create(request):
     form = TransaccionForm(request.POST or None)
     if form.is_valid():
-        form.save()
+        transaccion = form.save()
+        _actualizar_saldo(transaccion.cuenta)
         return redirect('transaccion_list')
     return render(request, 'wallet/transaccion_form.html', {'form': form, 'titulo': 'Nueva Transacción'})
 
 
 def transaccion_update(request, pk):
     transaccion = get_object_or_404(Transaccion, pk=pk)
+    cuenta_anterior = transaccion.cuenta
     form = TransaccionForm(request.POST or None, instance=transaccion)
     if form.is_valid():
-        form.save()
+        transaccion_guardada = form.save()
+        _actualizar_saldo(cuenta_anterior)
+        if transaccion_guardada.cuenta != cuenta_anterior:
+            _actualizar_saldo(transaccion_guardada.cuenta)
         return redirect('transaccion_list')
     return render(request, 'wallet/transaccion_form.html', {'form': form, 'titulo': 'Editar Transacción'})
 
@@ -79,6 +93,8 @@ def transaccion_update(request, pk):
 def transaccion_delete(request, pk):
     transaccion = get_object_or_404(Transaccion, pk=pk)
     if request.method == 'POST':
+        cuenta = transaccion.cuenta
         transaccion.delete()
+        _actualizar_saldo(cuenta)
         return redirect('transaccion_list')
     return render(request, 'wallet/transaccion_confirm_delete.html', {'objeto': transaccion, 'tipo': 'transacción'})
