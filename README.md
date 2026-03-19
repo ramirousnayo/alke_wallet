@@ -68,7 +68,6 @@ Para una explicación detallada del modelo de datos, las relaciones y capturas d
 ## 👤 Autor
 
 **Ramiro Usnayo**
-- GitHub: [@ramirousnayo](https://github.com/ramirousnayo)
 
 ---
 
