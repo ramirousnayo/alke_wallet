@@ -1,14 +1,64 @@
-<h1>Usuarios</h1>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Usuarios — Alke Wallet</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 900px; margin: 40px auto; padding: 0 20px; }
+        h1 { color: #2c3e50; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { padding: 10px 14px; border: 1px solid #ddd; text-align: left; }
+        th { background: #2c3e50; color: white; }
+        tr:nth-child(even) { background: #f5f5f5; }
+        .btn { padding: 7px 13px; border-radius: 4px; text-decoration: none; font-size: 0.88em; margin-right: 4px; display: inline-block; }
+        .btn-primary { background: #2980b9; color: white; }
+        .btn-warning { background: #f39c12; color: white; }
+        .btn-danger  { background: #e74c3c; color: white; }
+        .btn-success { background: #27ae60; color: white; margin-bottom: 16px; display: inline-block; }
+        nav { margin-bottom: 20px; }
+        nav a { margin-right: 14px; color: #2980b9; text-decoration: none; }
+        .empty { color: #888; margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="/">👤 Usuarios</a>
+        <a href="{% url 'transaccion_list' %}">💳 Transacciones</a>
+    </nav>
+    <h1>👤 Usuarios</h1>
+    <a href="{% url 'usuario_create' %}" class="btn btn-success">+ Nuevo Usuario</a>
 
-<a href="{% url 'usuario_create' %}">Crear Usuario</a>
-
-<ul>
-  {% for usuario in usuarios %}
-    <li>
-      {{ usuario.nombre }}
-      <a href="{% url 'usuario_detail' usuario.id %}">Ver</a>
-      <a href="{% url 'usuario_update' usuario.id %}">Editar</a>
-      <a href="{% url 'usuario_delete' usuario.id %}">Eliminar</a>
-    </li>
-  {% endfor %}
-</ul>
+    {% if usuarios %}
+    <table>
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Nombre</th>
+                <th>Email</th>
+                <th>Saldo</th>
+                <th>Registrado</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for usuario in usuarios %}
+            <tr>
+                <td>{{ usuario.id }}</td>
+                <td>{{ usuario.nombre }}</td>
+                <td>{{ usuario.email }}</td>
+                <td>${{ usuario.cuenta.saldo|default:"0.00" }}</td>
+                <td>{{ usuario.creado_en|date:"d/m/Y" }}</td>
+                <td>
+                    <a href="{% url 'usuario_detail' usuario.id %}" class="btn btn-primary">Ver</a>
+                    <a href="{% url 'usuario_update' usuario.id %}" class="btn btn-warning">Editar</a>
+                    <a href="{% url 'usuario_delete' usuario.id %}" class="btn btn-danger">Eliminar</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p class="empty">No hay usuarios registrados aún.</p>
+    {% endif %}
+</body>
+</html>
