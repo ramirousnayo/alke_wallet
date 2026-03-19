@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Transacciones — Alke Wallet</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 900px; margin: 40px auto; padding: 0 20px; }
+        h1 { color: #2c3e50; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { padding: 10px 14px; border: 1px solid #ddd; text-align: left; }
+        th { background: #2c3e50; color: white; }
+        tr:nth-child(even) { background: #f5f5f5; }
+        .badge-deposito { background: #27ae60; color: white; padding: 3px 8px; border-radius: 12px; font-size: 0.85em; }
+        .badge-retiro   { background: #e74c3c; color: white; padding: 3px 8px; border-radius: 12px; font-size: 0.85em; }
+        .btn { padding: 8px 14px; border-radius: 4px; text-decoration: none; display: inline-block; font-size: 0.9em; }
+        .btn-primary { background: #2980b9; color: white; }
+        .btn-warning { background: #f39c12; color: white; }
+        .btn-danger  { background: #e74c3c; color: white; }
+        .btn-success { background: #27ae60; color: white; margin-bottom: 16px; }
+        nav { margin-bottom: 20px; }
+        nav a { margin-right: 14px; color: #2980b9; text-decoration: none; }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="/">👤 Usuarios</a>
+        <a href="{% url 'transaccion_list' %}">💳 Transacciones</a>
+    </nav>
+    <h1>💳 Transacciones</h1>
+    <a href="{% url 'transaccion_create' %}" class="btn btn-success">+ Nueva Transacción</a>
+
+    {% if transacciones %}
+    <table>
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Cuenta (Usuario)</th>
+                <th>Tipo</th>
+                <th>Monto</th>
+                <th>Fecha</th>
+                <th>Descripción</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for t in transacciones %}
+            <tr>
+                <td>{{ t.id }}</td>
+                <td>{{ t.cuenta.usuario.nombre }}</td>
+                <td>
+                    {% if t.tipo == 'deposito' %}
+                        <span class="badge-deposito">Depósito</span>
+                    {% else %}
+                        <span class="badge-retiro">Retiro</span>
+                    {% endif %}
+                </td>
+                <td>${{ t.monto }}</td>
+                <td>{{ t.fecha|date:"d/m/Y H:i" }}</td>
+                <td>{{ t.descripcion|default:"-" }}</td>
+                <td>
+                    <a href="{% url 'transaccion_detail' t.pk %}" class="btn btn-primary">Ver</a>
+                    <a href="{% url 'transaccion_update' t.pk %}" class="btn btn-warning">Editar</a>
+                    <a href="{% url 'transaccion_delete' t.pk %}" class="btn btn-danger">Eliminar</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p>No hay transacciones registradas aún.</p>
+    {% endif %}
+</body>
+</html>

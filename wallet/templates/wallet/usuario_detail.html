@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Detalle de Usuario — Alke Wallet</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 0 20px; }
+        h1, h2 { color: #2c3e50; }
+        .card { border: 1px solid #ddd; border-radius: 8px; padding: 20px; margin: 16px 0; }
+        .card dt { font-weight: bold; color: #555; margin-top: 10px; }
+        .card dd { margin: 4px 0 0 0; }
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        th, td { padding: 8px 12px; border: 1px solid #ddd; text-align: left; }
+        th { background: #2c3e50; color: white; }
+        tr:nth-child(even) { background: #f9f9f9; }
+        .badge-deposito { background: #27ae60; color: white; padding: 2px 8px; border-radius: 10px; font-size: 0.82em; }
+        .badge-retiro   { background: #e74c3c; color: white; padding: 2px 8px; border-radius: 10px; font-size: 0.82em; }
+        .status-activa   { color: #27ae60; font-weight: bold; }
+        .status-inactiva { color: #e74c3c; font-weight: bold; }
+        .btn { padding: 7px 14px; border-radius: 4px; text-decoration: none; font-size: 0.88em; margin-right: 6px; }
+        .btn-warning { background: #f39c12; color: white; }
+        .btn-danger  { background: #e74c3c; color: white; }
+        .btn-back    { background: #95a5a6; color: white; }
+        .btn-success { background: #27ae60; color: white; }
+        nav { margin-bottom: 20px; }
+        nav a { margin-right: 14px; color: #2980b9; text-decoration: none; }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="/">👤 Usuarios</a>
+        <a href="{% url 'transaccion_list' %}">💳 Transacciones</a>
+    </nav>
+    <h1>👤 {{ usuario.nombre }}</h1>
+
+    <div class="card">
+        <dl>
+            <dt>Email</dt>
+            <dd>{{ usuario.email }}</dd>
+            <dt>Registrado el</dt>
+            <dd>{{ usuario.creado_en|date:"d/m/Y H:i" }}</dd>
+        </dl>
+    </div>
+
+    <h2>💰 Cuenta</h2>
+    {% if usuario.cuenta %}
+    <div class="card">
+        <dl>
+            <dt>Saldo</dt>
+            <dd><strong>${{ usuario.cuenta.saldo }}</strong></dd>
+            <dt>Estado</dt>
+            <dd>
+                {% if usuario.cuenta.activa %}
+                    <span class="status-activa">✅ Activa</span>
+                {% else %}
+                    <span class="status-inactiva">❌ Inactiva</span>
+                {% endif %}
+            </dd>
+        </dl>
+    </div>
+    {% else %}
+    <p>Este usuario no tiene una cuenta asociada.</p>
+    {% endif %}
+
+    <h2>📋 Historial de Transacciones</h2>
+    <a href="{% url 'transaccion_create' %}" class="btn btn-success" style="display:inline-block; margin-bottom:12px;">+ Nueva Transacción</a>
+    {% if transacciones %}
+    <table>
+        <thead>
+            <tr><th>Tipo</th><th>Monto</th><th>Fecha</th><th>Descripción</th><th>Acciones</th></tr>
+        </thead>
+        <tbody>
+            {% for t in transacciones %}
+            <tr>
+                <td>{% if t.tipo == 'deposito' %}<span class="badge-deposito">Depósito</span>{% else %}<span class="badge-retiro">Retiro</span>{% endif %}</td>
+                <td>${{ t.monto }}</td>
+                <td>{{ t.fecha|date:"d/m/Y H:i" }}</td>
+                <td>{{ t.descripcion|default:"-" }}</td>
+                <td>
+                    <a href="{% url 'transaccion_detail' t.pk %}" class="btn btn-back">Ver</a>
+                    <a href="{% url 'transaccion_delete' t.pk %}" class="btn btn-danger">Eliminar</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p>No hay transacciones para este usuario aún.</p>
+    {% endif %}
+
+    <br>
+    <a href="{% url 'usuario_list' %}" class="btn btn-back">← Volver</a>
+    <a href="{% url 'usuario_update' usuario.pk %}" class="btn btn-warning">Editar</a>
+    <a href="{% url 'usuario_delete' usuario.pk %}" class="btn btn-danger">Eliminar</a>
+</body>
+</html>

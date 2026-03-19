@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Detalle Transacción — Alke Wallet</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 600px; margin: 40px auto; padding: 0 20px; }
+        h1 { color: #2c3e50; }
+        .card { border: 1px solid #ddd; border-radius: 8px; padding: 20px; margin-top: 20px; }
+        .card dt { font-weight: bold; color: #555; margin-top: 12px; }
+        .card dd { margin: 4px 0 0 0; }
+        .badge-deposito { background: #27ae60; color: white; padding: 3px 10px; border-radius: 12px; }
+        .badge-retiro   { background: #e74c3c; color: white; padding: 3px 10px; border-radius: 12px; }
+        .btn { padding: 8px 14px; border-radius: 4px; text-decoration: none; font-size: 0.9em; margin-right: 8px; }
+        .btn-warning { background: #f39c12; color: white; }
+        .btn-danger  { background: #e74c3c; color: white; }
+        .btn-back    { background: #95a5a6; color: white; }
+        nav { margin-bottom: 20px; }
+        nav a { margin-right: 14px; color: #2980b9; text-decoration: none; }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="/">👤 Usuarios</a>
+        <a href="{% url 'transaccion_list' %}">💳 Transacciones</a>
+    </nav>
+    <h1>Detalle — Transacción #{{ transaccion.pk }}</h1>
+    <div class="card">
+        <dl>
+            <dt>Usuario</dt>
+            <dd>{{ transaccion.cuenta.usuario.nombre }}</dd>
+
+            <dt>Tipo</dt>
+            <dd>
+                {% if transaccion.tipo == 'deposito' %}
+                    <span class="badge-deposito">Depósito</span>
+                {% else %}
+                    <span class="badge-retiro">Retiro</span>
+                {% endif %}
+            </dd>
+
+            <dt>Monto</dt>
+            <dd>${{ transaccion.monto }}</dd>
+
+            <dt>Fecha</dt>
+            <dd>{{ transaccion.fecha|date:"d/m/Y H:i" }}</dd>
+
+            <dt>Descripción</dt>
+            <dd>{{ transaccion.descripcion|default:"Sin descripción" }}</dd>
+        </dl>
+    </div>
+    <br>
+    <a href="{% url 'transaccion_list' %}" class="btn btn-back">← Volver</a>
+    <a href="{% url 'transaccion_update' transaccion.pk %}" class="btn btn-warning">Editar</a>
+    <a href="{% url 'transaccion_delete' transaccion.pk %}" class="btn btn-danger">Eliminar</a>
+</body>
+</html>
