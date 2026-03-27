@@ -28,7 +28,7 @@ Se recomienda usar un entorno virtual:
 ```bash
 python3 -m venv venv
 source venv/bin/activate  # En Mac/Linux
-# o venv\Scripts\activate en Windows
+venv\Scripts\activate # En Windows
 ```
 
 ### 3. Instalar dependencias
