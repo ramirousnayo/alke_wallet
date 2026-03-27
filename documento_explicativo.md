@@ -2,24 +2,40 @@
 
 ## 1. Modelo de Datos
 
-Se crearon tres modelos:
+Para este proyecto, se diseñaron tres modelos interconectados que representan la lógica de negocio de una billetera digital:
 
-- **Usuario**: `nombre`, `email` (único), `creado_en`. Representa a la persona registrada.
-- **Cuenta**: `saldo`, `activa`. Ligada a un Usuario con relación **1 a 1** (`OneToOneField`). Se crea automáticamente al registrar un usuario.
-- **Transaccion**: `tipo` (depósito/retiro), `monto`, `fecha`, `descripcion`. Ligada a una Cuenta con relación **1 a N** (`ForeignKey`).
+- **Modelo `Usuario`**: Representa al cliente del banco.
+    - **Campos**: `nombre` (CharField), `email` (EmailField único), `creado_en` (DateTimeField automático).
+    - **Relación**: Es el modelo base. No tiene claves foráneas externas.
 
-Eliminar un Usuario borra en cascada su Cuenta y todas sus Transacciones.
+- **Modelo `Cuenta`**: Representa las cuentas bancarias asociadas a un usuario.
+    - **Campos**: `saldo` (DecimalField con 2 decimales), `tipo_cuenta` (CharField con opciones: 'corriente' o 'ahorro').
+    - **Relación**: **ForeignKey (1 a N)** hacia `Usuario`. Un usuario puede tener múltiples cuentas. Se usa `on_delete=CASCADE` para mantener la integridad.
+
+- **Modelo `Transaccion`**: Registra los movimientos de dinero.
+    - **Campos**: `monto` (DecimalField), `tipo` (CharField: 'deposito' o 'retiro'), `fecha` (DateTimeField), `descripcion` (TextField opcional).
+    - **Relación**: **ForeignKey (1 a N)** hacia `Cuenta`. Cada transacción pertenece a una sola cuenta.
 
 ---
 
 ## 2. Operaciones CRUD Implementadas
 
-Se implementó CRUD completo desde el navegador para **Usuario** y **Transaccion**:
+Se han desarrollado vistas basadas en funciones utilizando el ORM de Django para las siguientes operaciones:
 
-- **Crear**: Formulario para agregar un nuevo registro. Al crear un Usuario, se genera su Cuenta automáticamente con saldo 0.
-- **Leer**: Lista general de registros y vista de detalle individual. El detalle de usuario muestra su cuenta y el historial de transacciones.
-- **Actualizar**: Formulario prellenado con los datos actuales para editarlos.
-- **Eliminar**: Pantalla de confirmación antes de borrar. Al eliminar una transacción, el saldo de la cuenta se recalcula automáticamente.
+### 👤 Gestión de Usuarios
+- **Crear**: A través de `UsuarioForm`, se validan y guardan nuevos clientes en la base de datos.
+- **Leer**: Se implementó una lista general de usuarios (`Usuario.objects.all()`) con filtros avanzados por tipo de cuenta y ordenamiento por saldo. También existe una vista de detalle que recupera un usuario específico y sus cuentas relacionadas.
+- **Actualizar**: Permite modificar el nombre o email de un cliente existente.
+- **Eliminar**: Elimina el registro del usuario y, por efecto de la relación `CASCADE`, borra automáticamente sus cuentas y transacciones.
+
+### 💰 Gestión de Cuentas (Banco)
+- **Crear**: Permite añadir nuevas cuentas (ahorro/corriente) a un usuario existente.
+- **Actualizar/Eliminar**: Permite gestionar las cuentas de forma independiente desde el perfil del usuario.
+
+### 💳 Gestión de Transacciones
+- **Crear**: Permite registrar ingresos o egresos vinculados a una cuenta.
+- **Leer**: Listado global de todas las transacciones realizadas en el sistema, permitiendo ver el historial completo de movimientos del banco.
+- **Detalle/Editar/Eliminar**: Gestión completa de cada movimiento individual para correcciones o auditoría.
 
 ---
 

@@ -8,6 +8,11 @@ urlpatterns = [
     path('crear/', views.usuario_create, name='usuario_create'),
     path('editar/<int:pk>/', views.usuario_update, name='usuario_update'),
     path('eliminar/<int:pk>/', views.usuario_delete, name='usuario_delete'),
+    
+    # Cuentas
+    path('usuario/<int:usuario_id>/nueva-cuenta/', views.cuenta_create, name='cuenta_create'),
+    path('cuenta/editar/<int:pk>/', views.cuenta_update, name='cuenta_update'),
+    path('cuenta/eliminar/<int:pk>/', views.cuenta_delete, name='cuenta_delete'),
 
     # Transaccion
     path('transacciones/', views.transaccion_list, name='transaccion_list'),

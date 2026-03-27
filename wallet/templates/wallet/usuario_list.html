@@ -1,34 +1,161 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <title>Usuarios — Alke Wallet</title>
     <style>
-        body { font-family: Arial, sans-serif; max-width: 900px; margin: 40px auto; padding: 0 20px; }
-        h1 { color: #2c3e50; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { padding: 10px 14px; border: 1px solid #ddd; text-align: left; }
-        th { background: #2c3e50; color: white; }
-        tr:nth-child(even) { background: #f5f5f5; }
-        .btn { padding: 7px 13px; border-radius: 4px; text-decoration: none; font-size: 0.88em; margin-right: 4px; display: inline-block; }
-        .btn-primary { background: #2980b9; color: white; }
-        .btn-warning { background: #f39c12; color: white; }
-        .btn-danger  { background: #e74c3c; color: white; }
-        .btn-success { background: #27ae60; color: white; margin-bottom: 16px; display: inline-block; }
-        nav { margin-bottom: 20px; }
-        nav a { margin-right: 14px; color: #2980b9; text-decoration: none; }
-        .empty { color: #888; margin-top: 20px; }
-        .messages { list-style: none; padding: 0; margin: 20px 0; }
-        .alert { padding: 12px 20px; border-radius: 6px; margin-bottom: 10px; font-weight: bold; }
-        .alert-success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 950px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        h1 {
+            color: #2c3e50;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        th,
+        td {
+            padding: 10px 14px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+
+        th {
+            background: #2c3e50;
+            color: white;
+        }
+
+        tr:nth-child(even) {
+            background: #f5f5f5;
+        }
+
+        .btn {
+            padding: 7px 13px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-size: 0.88em;
+            margin-right: 4px;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: #2980b9;
+            color: white;
+        }
+
+        .btn-warning {
+            background: #f39c12;
+            color: white;
+        }
+
+        .btn-danger {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .btn-success {
+            background: #27ae60;
+            color: white;
+            margin-bottom: 16px;
+            display: inline-block;
+        }
+
+        .btn-outline {
+            border: 1px solid #2980b9;
+            color: #2980b9;
+        }
+
+        .btn-outline.active {
+            background: #2980b9;
+            color: white;
+        }
+
+        nav {
+            margin-bottom: 20px;
+        }
+
+        nav a {
+            margin-right: 14px;
+            color: #2980b9;
+            text-decoration: none;
+        }
+
+        .empty {
+            color: #888;
+            margin-top: 20px;
+        }
+
+        .toolbar {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .toolbar-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .toolbar-label {
+            font-weight: bold;
+            color: #555;
+            font-size: 0.9em;
+        }
+
+        .messages {
+            list-style: none;
+            padding: 0;
+            margin: 20px 0;
+        }
+
+        .alert {
+            padding: 12px 20px;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .actions-cell {
+            display: flex;
+            justify-content: center;
+            gap: 6px;
+        }
     </style>
 </head>
+
 <body>
     <nav>
         <a href="/">👤 Usuarios</a>
         <a href="{% url 'transaccion_list' %}">💳 Transacciones</a>
     </nav>
-    <h1>👤 Usuarios</h1>
+    <h1>👤 Clientes del Banco</h1>
 
     {% if messages %}
     <ul class="messages">
@@ -38,7 +165,30 @@
     </ul>
     {% endif %}
 
-    <a href="{% url 'usuario_create' %}" class="btn btn-success">+ Nuevo Usuario</a>
+    <div class="toolbar">
+
+        <div class="toolbar-group">
+            <span class="toolbar-label">Filtros:</span>
+            <a href="?{% if orden %}orden={{ orden }}{% endif %}"
+                class="btn btn-outline {% if not tipo %}active{% endif %}">Todas las Cuentas</a>
+            <a href="?tipo=corriente{% if orden %}&orden={{ orden }}{% endif %}"
+                class="btn btn-outline {% if tipo == 'corriente' %}active{% endif %}">Sólo Corriente</a>
+            <a href="?tipo=ahorro{% if orden %}&orden={{ orden }}{% endif %}"
+                class="btn btn-outline {% if tipo == 'ahorro' %}active{% endif %}">Sólo Ahorro</a>
+        </div>
+
+        <div class="toolbar-group">
+            <span class="toolbar-label">Ordenar:</span>
+            <a href="?orden=saldo_desc{% if tipo %}&tipo={{ tipo }}{% endif %}"
+                class="btn btn-outline {% if orden == 'saldo_desc' %}active{% endif %}">Monto Mayor (↓)</a>
+            <a href="?orden=saldo_asc{% if tipo %}&tipo={{ tipo }}{% endif %}"
+                class="btn btn-outline {% if orden == 'saldo_asc' %}active{% endif %}">Monto Menor (↑)</a>
+        </div>
+
+        <div class="toolbar-group">
+            <a href="{% url 'usuario_create' %}" class="btn btn-success" style="margin-bottom:0;">+ Nuevo Cliente</a>
+        </div>
+    </div>
 
     {% if usuarios %}
     <table>
@@ -47,9 +197,10 @@
                 <th>#</th>
                 <th>Nombre</th>
                 <th>Email</th>
-                <th>Saldo</th>
-                <th>Registrado</th>
-                <th>Acciones</th>
+                <th>Cuentas</th>
+                <th class="text-center">Saldo Total</th>
+                <th class="text-center">Registrado</th>
+                <th class="text-center">Acciones</th>
             </tr>
         </thead>
         <tbody>
@@ -58,19 +209,29 @@
                 <td>{{ usuario.id }}</td>
                 <td>{{ usuario.nombre }}</td>
                 <td>{{ usuario.email }}</td>
-                <td>${{ usuario.cuenta.saldo|default:"0.00" }}</td>
-                <td>{{ usuario.creado_en|date:"d/m/Y" }}</td>
                 <td>
-                    <a href="{% url 'usuario_detail' usuario.id %}" class="btn btn-primary">Ver</a>
-                    <a href="{% url 'usuario_update' usuario.id %}" class="btn btn-warning">Editar</a>
-                    <a href="{% url 'usuario_delete' usuario.id %}" class="btn btn-danger">Eliminar</a>
+                    {% for cuenta in usuario.cuentas.all %}
+                    {{ cuenta.get_tipo_cuenta_display }}{% if not forloop.last %}, {% endif %}
+                    {% empty %}
+                    -
+                    {% endfor %}
+                </td>
+                <td class="text-center"><strong>${{ usuario.total_saldo|default:"0.00" }}</strong></td>
+                <td class="text-center">{{ usuario.creado_en|date:"d/m/Y" }}</td>
+                <td class="text-center">
+                    <div class="actions-cell">
+                        <a href="{% url 'usuario_detail' usuario.id %}" class="btn btn-primary" style="margin-right:0;">Ver</a>
+                        <a href="{% url 'usuario_update' usuario.id %}" class="btn btn-warning" style="margin-right:0;">Editar</a>
+                        <a href="{% url 'usuario_delete' usuario.id %}" class="btn btn-danger" style="margin-right:0;">Eliminar</a>
+                    </div>
                 </td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
     {% else %}
-    <p class="empty">No hay usuarios registrados aún.</p>
+    <p class="empty">No se encontraron clientes con los filtros seleccionados.</p>
     {% endif %}
 </body>
+
 </html>

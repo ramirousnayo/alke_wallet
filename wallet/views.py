@@ -1,13 +1,44 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
+from django.db.models import Sum, Q, Prefetch
 from .models import Usuario, Cuenta, Transaccion
-from .forms import UsuarioForm, TransaccionForm
+from .forms import UsuarioForm, TransaccionForm, CuentaForm
 
 # ─── USUARIO CRUD ───────────────────────────────────────────────
 
 def usuario_list(request):
-    usuarios = Usuario.objects.all()
-    return render(request, 'wallet/usuario_list.html', {'usuarios': usuarios})
+    tipo = request.GET.get('tipo', '')
+    orden = request.GET.get('orden', '')
+
+    # Caso CON filtro de tipo de cuenta
+    if tipo in ['corriente', 'ahorro']:
+        # 1. Filtramos los usuarios que tienen al menos una cuenta de ese tipo
+        # 2. Anotamos el saldo sumando SOLO las cuentas de ese tipo (ORM filter en Sum)
+        # 3. Pre-cargamos SOLO las cuentas de ese tipo (Prefetch)
+        usuarios = Usuario.objects.filter(cuentas__tipo_cuenta=tipo).annotate(
+            total_saldo=Sum('cuentas__saldo', filter=Q(cuentas__tipo_cuenta=tipo))
+        ).prefetch_related(
+            Prefetch('cuentas', queryset=Cuenta.objects.filter(tipo_cuenta=tipo))
+        ).distinct()
+    else:
+        # Caso SIN filtro (Todas las Cuentas)
+        usuarios = Usuario.objects.annotate(
+            total_saldo=Sum('cuentas__saldo')
+        ).prefetch_related('cuentas')
+
+    # Ordenamiento por saldo
+    if orden == 'saldo_desc':
+        usuarios = usuarios.order_by('-total_saldo')
+    elif orden == 'saldo_asc':
+        usuarios = usuarios.order_by('total_saldo')
+    else:
+        usuarios = usuarios.order_by('-creado_en')
+
+    return render(request, 'wallet/usuario_list.html', {
+        'usuarios': usuarios,
+        'tipo': tipo,
+        'orden': orden
+    })
 
 
 def usuario_detail(request, pk):
@@ -50,6 +81,54 @@ def usuario_delete(request, pk):
         messages.success(request, f'Usuario {nombre} eliminado con éxito.')
         return redirect('usuario_list')
     return render(request, 'wallet/usuario_confirm_delete.html', {'objeto': usuario, 'tipo': 'usuario'})
+
+
+# ─── CUENTA CRUD ────────────────────────────────────────────────
+
+def cuenta_create(request, usuario_id):
+    usuario = get_object_or_404(Usuario, pk=usuario_id)
+    if request.method == 'POST':
+        form = CuentaForm(request.POST)
+        if form.is_valid():
+            cuenta = form.save(commit=False)
+            cuenta.usuario = usuario
+            cuenta.save()
+            messages.success(request, f'Cuenta {cuenta.get_tipo_cuenta_display()} agregada a {usuario.nombre}.')
+            return redirect('usuario_detail', pk=usuario.id)
+    else:
+        tipo_inicial = request.GET.get('tipo', 'corriente')
+        form = CuentaForm(initial={'tipo_cuenta': tipo_inicial})
+    
+    return render(request, 'wallet/cuenta_form.html', {
+        'form': form, 
+        'usuario': usuario,
+        'titulo': 'Nueva Cuenta'
+    })
+
+
+def cuenta_update(request, pk):
+    cuenta = get_object_or_404(Cuenta, pk=pk)
+    form = CuentaForm(request.POST or None, instance=cuenta)
+    if form.is_valid():
+        form.save()
+        messages.success(request, f'Cuenta {cuenta.get_tipo_cuenta_display()} actualizada.')
+        return redirect('usuario_detail', pk=cuenta.usuario.id)
+    return render(request, 'wallet/cuenta_form.html', {
+        'form': form, 
+        'usuario': cuenta.usuario, 
+        'titulo': 'Editar Cuenta'
+    })
+
+
+def cuenta_delete(request, pk):
+    cuenta = get_object_or_404(Cuenta, pk=pk)
+    usuario_id = cuenta.usuario.id
+    if request.method == 'POST':
+        tipo = cuenta.get_tipo_cuenta_display()
+        cuenta.delete()
+        messages.success(request, f'Cuenta {tipo} eliminada.')
+        return redirect('usuario_detail', pk=usuario_id)
+    return render(request, 'wallet/usuario_confirm_delete.html', {'objeto': cuenta, 'tipo': 'cuenta'})
 
 
 # ─── TRANSACCION CRUD ────────────────────────────────────────────

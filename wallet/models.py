@@ -10,12 +10,18 @@ class Usuario(models.Model):
 
 
 class Cuenta(models.Model):
-    usuario = models.OneToOneField(Usuario, on_delete=models.CASCADE)
+    TIPO_CUENTA_CHOICES = [
+        ('corriente', 'Cuenta Corriente'),
+        ('ahorro', 'Cuenta de Ahorro'),
+    ]
+
+    usuario = models.ForeignKey(Usuario, related_name='cuentas', on_delete=models.CASCADE)
+    tipo_cuenta = models.CharField(max_length=20, choices=TIPO_CUENTA_CHOICES, default='corriente')
     saldo = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     activa = models.BooleanField(default=True)
 
     def __str__(self):
-        return f"Cuenta de {self.usuario.nombre}"
+        return f"{self.get_tipo_cuenta_display()} - {self.usuario.nombre}"
 
 
 class Transaccion(models.Model):

@@ -22,6 +22,8 @@
         .messages { list-style: none; padding: 0; margin: 20px 0; }
         .alert { padding: 12px 20px; border-radius: 6px; margin-bottom: 10px; font-weight: bold; }
         .alert-success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .text-center { text-align: center; }
+        .actions-cell { display: flex; justify-content: center; gap: 6px; }
     </style>
 </head>
 <body>
@@ -47,11 +49,11 @@
             <tr>
                 <th>#</th>
                 <th>Cuenta (Usuario)</th>
-                <th>Tipo</th>
-                <th>Monto</th>
-                <th>Fecha</th>
+                <th class="text-center">Tipo</th>
+                <th class="text-center">Monto</th>
+                <th class="text-center">Fecha</th>
                 <th>Descripción</th>
-                <th>Acciones</th>
+                <th class="text-center">Acciones</th>
             </tr>
         </thead>
         <tbody>
@@ -59,20 +61,22 @@
             <tr>
                 <td>{{ t.id }}</td>
                 <td>{{ t.cuenta.usuario.nombre }}</td>
-                <td>
+                <td class="text-center">
                     {% if t.tipo == 'deposito' %}
                         <span class="badge-deposito">Depósito</span>
                     {% else %}
                         <span class="badge-retiro">Retiro</span>
                     {% endif %}
                 </td>
-                <td>${{ t.monto }}</td>
-                <td>{{ t.fecha|date:"d/m/Y H:i" }}</td>
+                <td class="text-center">${{ t.monto }}</td>
+                <td class="text-center">{{ t.fecha|date:"d/m/Y H:i" }}</td>
                 <td>{{ t.descripcion|default:"-" }}</td>
-                <td>
-                    <a href="{% url 'transaccion_detail' t.pk %}" class="btn btn-primary">Ver</a>
-                    <a href="{% url 'transaccion_update' t.pk %}" class="btn btn-warning">Editar</a>
-                    <a href="{% url 'transaccion_delete' t.pk %}" class="btn btn-danger">Eliminar</a>
+                <td class="text-center">
+                    <div class="actions-cell">
+                        <a href="{% url 'transaccion_detail' t.pk %}" class="btn btn-primary" style="margin:0;">Ver</a>
+                        <a href="{% url 'transaccion_update' t.pk %}" class="btn btn-warning" style="margin:0;">Editar</a>
+                        <a href="{% url 'transaccion_delete' t.pk %}" class="btn btn-danger" style="margin:0;">Eliminar</a>
+                    </div>
                 </td>
             </tr>
             {% endfor %}
