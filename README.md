@@ -38,10 +38,15 @@ pip install -r requirements.txt
 
 ### 4. Variables de Entorno
 Crea un archivo `.env` en la raíz del proyecto copiando el archivo de ejemplo:
-   ```bash
-   cp .env.example .env
-   ```
-Luego edita `.env` con tus propios valores (clave secreta, modo debug, etc.).
+```bash
+cp .env.example .env
+```
+Genera una clave única y segura con el siguiente comando:
+```bash
+python3 -c "import secrets; print(secrets.token_urlsafe(50))"
+```
+Luego abre el archivo `.env` y pega la clave generada en la variable `SECRET_KEY`.
+
 
 ### 5. Preparar la Base de Datos
 Es fundamental aplicar las migraciones para activar el esquema multi-cuenta:
